@@ -10,4 +10,16 @@
         <maven.compiler.release>25</maven.compiler.release>
         <exec.mainClass>frauas.huankiet.flashcard.Flashcard</exec.mainClass>
     </properties>
+    <dependencies>
+	<dependency>
+	<groupId>org.postgresql</groupId>
+	<artifactId>postgresql</artifactId>
+	<version>42.7.0</version>
+	</dependency>
+	<dependency>
+	    <groupId>io.github.cdimascio</groupId>
+	    <artifactId>dotenv-java</artifactId>
+	    <version>3.0.0</version>
+	</dependency>
+    </dependencies>
 </project>
