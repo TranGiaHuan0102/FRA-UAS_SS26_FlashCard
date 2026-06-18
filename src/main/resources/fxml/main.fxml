@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx"
+            fx:controller="flashcard.app.controller.MainController"
+            prefHeight="700.0" prefWidth="500.0">
+
+    <top>
+        <VBox spacing="10" styleClass="header" style="-fx-padding: 10 20 10 20;">
+            <HBox spacing="15" alignment="CENTER" >
+                <Button fx:id="decksNavButton"
+                        text="Decks"
+                        onAction="#showDecksView"
+                        prefWidth="120.0"
+                        prefHeight="30.0"
+                        style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #d3d3d3; -fx-cursor: hand;" />
+
+                <Button fx:id="statsNavButton"
+                        text="Statistics"
+                        onAction="#showStatsView"
+                        prefWidth="120.0"
+                        prefHeight="30.0"
+                        style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" />
+            </HBox>
+
+            <TextField fx:id="searchField"
+                       maxWidth="450.0"
+                       prefHeight="40.0"
+                       style="-fx-font-size: 16px; -fx-background-radius: 8; -fx-padding: 0 15 0 15;"
+                       promptText="Search decks..."/>
+        </VBox>
+    </top>
+
+    <center>
+        <StackPane fx:id="contentArea" style="-fx-padding: 15;">
+            <VBox fx:id="deckViewContainer" spacing="10" styleClass="content">
+                <Label text="Your Decks" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                <ListView fx:id="deckList" style="-fx-font-size: 16px;" prefHeight="500"/>
+            </VBox>
+        </StackPane>
+    </center>
+</BorderPane>

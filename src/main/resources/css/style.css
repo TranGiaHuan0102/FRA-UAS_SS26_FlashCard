@@ -1,0 +1,12 @@
+.root {
+    -fx-font-family: "Segoe UI";
+    -fx-padding: 20;
+}
+
+.button {
+    -fx-font-size: 14;
+}
+
+.label {
+    -fx-font-size: 18;
+}
