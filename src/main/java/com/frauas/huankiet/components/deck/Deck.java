@@ -1,6 +1,6 @@
-package com.frauas.huankiet.deck;
+package com.frauas.huankiet.components.deck;
+import com.frauas.huankiet.components.card.*;
 import com.frauas.huankiet.miscellaneous.IDGenerator;
-import com.frauas.huankiet.card.*;
 import java.time.LocalDateTime;
 
 public class Deck {

@@ -1,4 +1,4 @@
-package flashcard.app.util;
+package com.frauas.huankiet.app.util;
 
 import java.util.UUID;
 

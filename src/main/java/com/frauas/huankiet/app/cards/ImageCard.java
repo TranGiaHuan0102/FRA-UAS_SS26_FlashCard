@@ -1,4 +1,4 @@
-package flashcard.app.card;
+package com.frauas.huankiet.app.cards;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

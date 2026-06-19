@@ -1,4 +1,4 @@
-package com.frauas.huankiet.card;
+package com.frauas.huankiet.components.card;
 
 public class BasicCard extends Card {
 

@@ -1,4 +1,4 @@
-package flashcard.app.card;
+package com.frauas.huankiet.app.cards;
 
 public class BasicCard extends Card {
 
