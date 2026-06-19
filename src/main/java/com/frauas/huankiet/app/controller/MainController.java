@@ -9,11 +9,12 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.geometry.Pos;
 import javafx.scene.layout.VBox;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 import com.frauas.huankiet.app.util.UIManager;
 import com.frauas.huankiet.app.service.MockService;
@@ -21,8 +22,9 @@ import com.frauas.huankiet.app.deck.Deck;
 
 public class MainController {
 
-
     public static Deck currentStudyDeck;
+    // Track which deck is currently being modified
+    public static Deck currentAdjustmentDeck;
 
     @FXML
     private StackPane contentArea;
@@ -37,48 +39,86 @@ public class MainController {
     @FXML
     private ListView<String> deckList;
 
-
-    private MockService mockService;
+    private static MockService mockService; //make it static so that the session registers newly added card
     private ObservableList<String> masterDeckData;
 
     @FXML
     public void initialize() {
+        if (mockService == null) {
+            mockService = new MockService();
+        }
 
-        mockService = new MockService();
         masterDeckData = FXCollections.observableArrayList();
 
         for (Deck deck : mockService.getDecks()) {
             masterDeckData.add(deck.getDeckName());
         }
 
-
         FilteredList<String> filteredData = new FilteredList<>(masterDeckData, p -> true);
-
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             filteredData.setPredicate(deckName -> {
-
                 if (newValue == null || newValue.isEmpty()) {
                     return true;
                 }
-
-
                 String lowerCaseFilter = newValue.toLowerCase();
                 return deckName.toLowerCase().contains(lowerCaseFilter);
             });
         });
 
-
         deckList.setItems(filteredData);
 
+        // --- ADDED: Custom Cell Factory for Cog Settings Button ---
+        deckList.setCellFactory(lv -> new ListCell<String>() {
+            private final HBox hbox = new HBox();
+            private final Label label = new Label();
+            private final Button cogButton = new Button("⚙"); // Cog icon item
 
-        deckList.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2 && deckList.getSelectionModel().getSelectedItem() != null) {
+            {
+                hbox.setAlignment(Pos.CENTER_LEFT);
+                HBox.setHgrow(label, Priority.ALWAYS);
+                label.setMaxWidth(Double.MAX_VALUE);
 
-                handleStartStudy(null);
+                // Style the cog button slightly so it feels clickable on the right
+                cogButton.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-font-size: 16px; -fx-padding: 0 5 0 5;");
+                hbox.getChildren().addAll(label, cogButton);
+
+                cogButton.setOnAction(event -> {
+                    String deckName = getItem();
+                    if (deckName != null) {
+                        for (Deck deck : mockService.getDecks()) {
+                            if (deck.getDeckName().equalsIgnoreCase(deckName)) {
+                                currentAdjustmentDeck = deck;
+                                break;
+                            }
+                        }
+                        try {
+                            UIManager.switchScene("/fxml/DeckAdjustment.fxml");
+                        } catch (Exception e) {
+                            System.err.println("Failed to load Deck Adjustment screen.");
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    label.setText(item);
+                    setGraphic(hbox);
+                }
             }
         });
 
+        deckList.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && deckList.getSelectionModel().getSelectedItem() != null) {
+                handleStartStudy(null);
+            }
+        });
 
         showDecksView();
     }
@@ -112,7 +152,6 @@ public class MainController {
             return;
         }
 
-
         for (Deck deck : mockService.getDecks()) {
             if (deck.getDeckName().equalsIgnoreCase(selectedDeckName)) {
                 currentStudyDeck = deck;
@@ -121,7 +160,6 @@ public class MainController {
         }
 
         try {
-
             UIManager.switchScene("/fxml/StudySession.fxml");
         } catch (Exception e) {
             System.err.println("Failed routing application layout state redirect profiles.");

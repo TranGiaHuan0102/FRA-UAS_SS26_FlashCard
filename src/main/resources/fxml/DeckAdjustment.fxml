@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx"
+            fx:controller="flashcard.app.controller.DeckAdjustmentController"
+            prefHeight="700.0" prefWidth="500.0">
+    <top>
+        <VBox spacing="10" style="-fx-padding: 20; -fx-background-color: #f4f4f4;">
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Button text="← Back" onAction="#handleBack" style="-fx-font-size: 14px; -fx-cursor: hand;"/>
+                <Label fx:id="deckNameLabel" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="15" style="-fx-padding: 20;">
+            <Label text="Cards List:" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+            <ListView fx:id="cardListView" prefHeight="480.0" style="-fx-font-size: 14px;"/>
+
+            <HBox spacing="15" alignment="CENTER_RIGHT">
+                <Button text="Delete Card"
+                        onAction="#handleDeleteCard"
+                        style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 8 15 8 15;"/>
+
+                <MenuButton text="Add Card"
+                            style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 5 10 5 10;">
+                    <items>
+                        <MenuItem text="Regular Card" onAction="#handleAddRegularCard"/>
+                        <MenuItem text="Image Card" onAction="#handleAddImageCard"/>
+                    </items>
+                </MenuButton>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>
