@@ -48,7 +48,6 @@
             </VBox>
         </StackPane>
     </center>
-
     <bottom>
         <HBox alignment="CENTER" style="-fx-padding: 10 15 20 15;">
             <Button text="Add Deck"

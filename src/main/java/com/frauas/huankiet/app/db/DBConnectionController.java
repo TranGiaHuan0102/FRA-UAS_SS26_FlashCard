@@ -1,8 +1,8 @@
-package com.frauas.huankiet.database.connection;
+package com.frauas.huankiet.app.db;
 import io.github.cdimascio.dotenv.Dotenv;
 import java.sql.*;
 
-public class ConnectionManager {
+public class DBConnectionController {
 	// Configurations	
 	private static final Dotenv dotenv = Dotenv.load();
 	private static final String POSTGRES_URL = dotenv.get("POSTGRES_URL");
@@ -11,24 +11,33 @@ public class ConnectionManager {
 	private static final String PASSWORD = dotenv.get("DB_PASSWORD");
 
 	// Return a connection to admin PostgreSQL DB
-	public static Connection PostgreSQLConnection(){
+	protected static Connection PostgreSQLConnection(){
 		try{
 			return DriverManager.getConnection(POSTGRES_URL, USERNAME, PASSWORD);
 		}
 		catch (SQLException e){
-			System.err.println("Connection Manager: Unable to access PostgreSQL!");
+			System.err.println("DBConnectionController: Unable to access PostgreSQL!");
+			e.printStackTrace();
 			return null;
 		}
 	}
 
 	// Return a connection to any DB
-	public static Connection AnyConnection(String dbName){
+	protected static Connection AnyConnection(String dbName){
 		try{
 			return DriverManager.getConnection(DB_URL + dbName, USERNAME, PASSWORD);
 		}
 		catch (SQLException e){
-			System.err.println("AnyConnection: Unable to access database " + dbName);
+			System.err.println("DBConnectionController: Unable to access database " + dbName);
+			e.printStackTrace();
 			return null;
 		}
+	}
+
+	protected static void CloseConnection(Connection conn) throws DBConnectionException{
+		try{
+			conn.close();
+		}
+		catch (SQLException e){throw new DBConnectionException("Unable to close connection to DB", e);}
 	}
 }
