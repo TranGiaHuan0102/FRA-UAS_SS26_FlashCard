@@ -1,24 +1,28 @@
 package com.frauas.huankiet.app.controller;
-
+import com.frauas.huankiet.app.util.UIManager;
+import com.frauas.huankiet.app.cards.Card;
+import com.frauas.huankiet.app.cards.ImageCard;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.scene.paint.Color;
-import com.frauas.huankiet.app.util.UIManager;
-import com.frauas.huankiet.app.cards.Card;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class StudySessionController {
+public class StudyController {
 
     @FXML private Label frontTextLabel;
-    @FXML private TextFlow feedbackFlow;
+    @FXML private HBox feedbackFlow;
     @FXML private TextField answerField;
     @FXML private Button backButton;
 
@@ -79,6 +83,7 @@ public class StudySessionController {
     private void loadRandomCard() {
 
         if (cards == null || cards.isEmpty()) {
+            frontTextLabel.setGraphic(null);
             frontTextLabel.setText("No cards found in this deck.");
             correctBackText = "";
             answerField.setEditable(false);
@@ -89,7 +94,33 @@ public class StudySessionController {
         int randomIndex = random.nextInt(cards.size());
         Card card = cards.get(randomIndex);
 
-        frontTextLabel.setText(card.getFrontSide());
+        // --- NEW LOGIC: Check if it's an ImageCard ---
+        if (card instanceof ImageCard) {
+            frontTextLabel.setText(""); // Clear the text
+            try {
+                String path = card.getFrontSide();
+                // JavaFX Image requires a URI (like file://...). Convert absolute path to URI.
+                if (!path.startsWith("file:") && !path.startsWith("http")) {
+                    path = new File(path).toURI().toString();
+                }
+
+                Image img = new Image(path);
+                ImageView imgView = new ImageView(img);
+
+                // Scale the image so it doesn't break your UI
+                imgView.setFitWidth(350);
+                imgView.setPreserveRatio(true);
+
+                frontTextLabel.setGraphic(imgView);
+            } catch (Exception e) {
+                frontTextLabel.setGraphic(null);
+                frontTextLabel.setText("[Error loading image: " + card.getFrontSide() + "]");
+            }
+        } else {
+            frontTextLabel.setGraphic(null);
+            frontTextLabel.setText(card.getFrontSide());
+        }
+
         correctBackText = card.getBackSide();
 
         feedbackFlow.getChildren().clear();

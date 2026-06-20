@@ -1,8 +1,8 @@
-package flashcard.app.controller;
+package com.frauas.huankiet.app.controller;
 
-import flashcard.app.card.Card;
-import flashcard.app.deck.Deck;
-import flashcard.app.util.UIManager;
+import com.frauas.huankiet.app.cards.Card;
+import com.frauas.huankiet.app.deck.Deck;
+import com.frauas.huankiet.app.util.UIManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -10,10 +10,13 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.stage.FileChooser;
+import java.io.File;
+import javafx.scene.layout.HBox;
 
 import java.util.Optional;
 
-public class DeckAdjustmentController {
+public class DeckEditController {
 
     @FXML private Label deckNameLabel;
     @FXML private ListView<Card> cardListView;
@@ -109,7 +112,7 @@ public class DeckAdjustmentController {
     public void handleAddImageCard(ActionEvent event) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Add Image Card");
-        dialog.setHeaderText("Enter details. Note: Image filename parameter must end with .jpg, .jpeg, or .png");
+        dialog.setHeaderText("Provide image and answer");
 
         ButtonType confirmButtonType = new ButtonType("Create", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(confirmButtonType, ButtonType.CANCEL);
@@ -120,12 +123,33 @@ public class DeckAdjustmentController {
         layoutGrid.setPadding(new Insets(20, 10, 10, 10));
 
         TextField imagePathInput = new TextField();
-        imagePathInput.setPromptText("e.g., chart.png");
+        imagePathInput.setPromptText("Choose an image...");
+        imagePathInput.setEditable(false); // Prevent manual typos, force them to use browse
+        imagePathInput.setPrefWidth(200);
+
+        Button browseButton = new Button("Browse...");
+        browseButton.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Select Image File");
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
+            );
+            // Open the file dialog
+            File selectedFile = fileChooser.showOpenDialog(dialog.getDialogPane().getScene().getWindow());
+            if (selectedFile != null) {
+                // Save the absolute path of the selected image
+                imagePathInput.setText(selectedFile.getAbsolutePath());
+            }
+        });
+
+        // Group the field and button together in an HBox
+        HBox imageInputBox = new HBox(10, imagePathInput, browseButton);
+
         TextField backDescriptionInput = new TextField();
         backDescriptionInput.setPromptText("Back answer/description...");
 
-        layoutGrid.add(new Label("Image Filename (Front):"), 0, 0);
-        layoutGrid.add(imagePathInput, 1, 0);
+        layoutGrid.add(new Label("Image File (Front):"), 0, 0);
+        layoutGrid.add(imageInputBox, 1, 0);
         layoutGrid.add(new Label("Back Description Text:"), 0, 1);
         layoutGrid.add(backDescriptionInput, 1, 1);
 
@@ -141,7 +165,6 @@ public class DeckAdjustmentController {
                 return;
             }
 
-            // Passes Image as Front (arg 1) and Text as Back (arg 2)
             targetDeck.addCard(imgPath, backDesc, true);
             refreshCardLayoutList();
         }

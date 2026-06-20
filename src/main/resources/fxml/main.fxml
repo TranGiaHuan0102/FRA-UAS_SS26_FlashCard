@@ -48,4 +48,14 @@
             </VBox>
         </StackPane>
     </center>
+
+    <bottom>
+        <HBox alignment="CENTER" style="-fx-padding: 10 15 20 15;">
+            <Button text="Add Deck"
+                    onAction="#handleCreateDeck"
+                    prefWidth="150.0"
+                    prefHeight="40.0"
+                    style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #4CAF50; -fx-text-fill: white; -fx-cursor: hand;" />
+        </HBox>
+    </bottom>
 </BorderPane>

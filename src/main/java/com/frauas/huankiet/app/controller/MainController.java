@@ -15,6 +15,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.geometry.Pos;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.fxml.FXMLLoader;
+
 
 import com.frauas.huankiet.app.util.UIManager;
 import com.frauas.huankiet.app.service.MockService;
@@ -23,7 +26,6 @@ import com.frauas.huankiet.app.deck.Deck;
 public class MainController {
 
     public static Deck currentStudyDeck;
-    // Track which deck is currently being modified
     public static Deck currentAdjustmentDeck;
 
     @FXML
@@ -93,7 +95,7 @@ public class MainController {
                             }
                         }
                         try {
-                            UIManager.switchScene("/fxml/DeckAdjustment.fxml");
+                            UIManager.switchScene("/fxml/deck_edit.fxml");
                         } catch (Exception e) {
                             System.err.println("Failed to load Deck Adjustment screen.");
                             e.printStackTrace();
@@ -121,10 +123,6 @@ public class MainController {
         });
 
         showDecksView();
-    }
-
-    public void openDecks(ActionEvent e) throws Exception {
-        UIManager.switchScene("/fxml/DeckView.fxml");
     }
 
     @FXML
@@ -158,9 +156,8 @@ public class MainController {
                 break;
             }
         }
-
         try {
-            UIManager.switchScene("/fxml/StudySession.fxml");
+            UIManager.switchScene("/fxml/study.fxml");
         } catch (Exception e) {
             System.err.println("Failed routing application layout state redirect profiles.");
             e.printStackTrace();
@@ -169,5 +166,33 @@ public class MainController {
 
     @FXML
     public void handleCreateDeck(ActionEvent actionEvent) {
+        try {
+            // Load the clean layout from FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/add_deck.fxml"));
+            javafx.scene.Parent root = loader.load();
+
+            // Set up the window
+            Stage popupStage = new Stage();
+            popupStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            popupStage.setTitle("Add New Deck");
+            popupStage.setScene(new javafx.scene.Scene(root));
+
+            // Wait until the user closes the popup or clicks save
+            popupStage.showAndWait();
+
+            // Retrieve the controller and check if the deck was saved
+            AddDeckController controller = loader.getController();
+            if (controller.isSaved()) {
+                Deck newDeck = controller.getCreatedDeck();
+
+                // Add it to our mock database and UI list
+                mockService.getDecks().add(newDeck);
+                masterDeckData.add(newDeck.getDeckName());
+            }
+
+        } catch (Exception e) {
+            System.err.println("Failed to load Add Deck Dialog layout.");
+            e.printStackTrace();
+        }
     }
 }

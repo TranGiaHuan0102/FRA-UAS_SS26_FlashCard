@@ -48,12 +48,11 @@ public class Deck {
     }
 
     // old addCard method code
-
     public void addCard(String cardType) {
         if ("IMAGE".equalsIgnoreCase(cardType)) {
             try {
                 // Feeds placeholder text to the new constructor
-                this.cards.add(new ImageCard("Placeholder TopText", "Placeholder.jpg"));
+                this.cards.add(new ImageCard("Placeholder.jpg", "Placeholder Description"));
                 this.deckSize++;
             } catch (Exception e) {
                 System.out.println(e.getMessage());
