@@ -1,4 +1,5 @@
 package com.frauas.huankiet.app.controller;
+import com.frauas.huankiet.app.util.StatsTracker;
 import com.frauas.huankiet.app.util.UIManager;
 import com.frauas.huankiet.app.cards.Card;
 import com.frauas.huankiet.app.cards.ImageCard;
@@ -98,7 +99,7 @@ public class StudyController {
         }
 
         // Render logic
-        if (currentCard instanceof flashcard.app.card.ImageCard) {
+        if (currentCard instanceof com.frauas.huankiet.app.cards.ImageCard) {
             frontTextLabel.setText("");
             try {
                 String path = currentCard.getFrontSide();

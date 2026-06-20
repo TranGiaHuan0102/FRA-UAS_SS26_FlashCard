@@ -11,7 +11,7 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
             xmlns="http://javafx.com/javafx"
-            fx:controller="flashcard.app.controller.DeckEditController"
+            fx:controller="com.frauas.huankiet.app.controller.DeckEditController"
             prefHeight="700.0" prefWidth="500.0">
     <top>
         <VBox spacing="10" style="-fx-padding: 20; -fx-background-color: #f4f4f4;">

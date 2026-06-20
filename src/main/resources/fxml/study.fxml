@@ -9,7 +9,7 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
             xmlns="http://javafx.com/javafx"
-            fx:controller="flashcard.app.controller.StudyController"
+            fx:controller="com.frauas.huankiet.app.controller.StudyController"
             prefHeight="700.0" prefWidth="500.0"
             style="-fx-background-color: #f9f9f9;">
 

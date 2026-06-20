@@ -6,7 +6,7 @@
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="flashcard.app.controller.StatisticsController"
+      fx:controller="com.frauas.huankiet.app.controller.StatisticsController"
       spacing="20" style="-fx-padding: 30; -fx-background-color: #ffffff;">
 
     <Label text="Learning Statistics" style="-fx-font-size: 26px; -fx-font-weight: bold;"/>
