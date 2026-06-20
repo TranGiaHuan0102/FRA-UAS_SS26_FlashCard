@@ -1,4 +1,4 @@
-module flashcards.app {
+module com.frauas.huankiet.app {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.base;

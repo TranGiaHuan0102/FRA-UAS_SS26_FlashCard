@@ -11,7 +11,7 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
             xmlns="http://javafx.com/javafx"
-            fx:controller="flashcard.app.controller.MainController"
+            fx:controller="com.frauas.huankiet.app.controller.MainController"
             prefHeight="700.0" prefWidth="500.0">
 
     <top>
@@ -48,4 +48,14 @@
             </VBox>
         </StackPane>
     </center>
+
+    <bottom>
+        <HBox alignment="CENTER" style="-fx-padding: 10 15 20 15;">
+            <Button text="Add Deck"
+                    onAction="#handleCreateDeck"
+                    prefWidth="150.0"
+                    prefHeight="40.0"
+                    style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #4CAF50; -fx-text-fill: white; -fx-cursor: hand;" />
+        </HBox>
+    </bottom>
 </BorderPane>

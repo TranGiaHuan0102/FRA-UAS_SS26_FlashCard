@@ -10,16 +10,15 @@ public class ImageCard extends Card {
         public String getMessage() { return "Invalid Image Filepath!"; }
     }
 
-    public ImageCard(String frontText, String imagePath) throws Exception {
+    public ImageCard(String imagePath, String backText) throws Exception {
         super();
-        this.frontSide = frontText;
-        this.backSide = validateImagePath(imagePath);
+        this.frontSide = validateImagePath(imagePath);
+        this.backSide = backText;
     }
 
     @Override
     public void createCard() throws Exception {
     }
-
     @Override
     public String getFrontSide() { return this.frontSide; }
     @Override
