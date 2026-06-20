@@ -13,7 +13,7 @@
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
 
-    <Label text="Set name:"/>
+    <Label text="Deck name:"/>
     <TextField fx:id="nameField"/>
 
     <Label text="Front text:"/>

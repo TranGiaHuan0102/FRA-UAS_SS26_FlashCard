@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="flashcard.app.controller.StatisticsController"
+      spacing="20" style="-fx-padding: 30; -fx-background-color: #ffffff;">
+
+    <Label text="Learning Statistics" style="-fx-font-size: 26px; -fx-font-weight: bold;"/>
+
+    <HBox spacing="30">
+        <VBox alignment="CENTER" prefWidth="200" prefHeight="100" style="-fx-background-color: #e3f2fd; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+            <Label text="New Cards Learned" style="-fx-font-size: 16px; -fx-text-fill: #1565c0;"/>
+            <Label fx:id="newCardsLabel" text="0" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #0d47a1;"/>
+        </VBox>
+
+        <VBox alignment="CENTER" prefWidth="200" prefHeight="100" style="-fx-background-color: #e8f5e9; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+            <Label text="Old Cards Revised" style="-fx-font-size: 16px; -fx-text-fill: #2e7d32;"/>
+            <Label fx:id="revisedCardsLabel" text="0" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
+        </VBox>
+    </HBox>
+
+    <Label text="Hard to remember deck (cards):" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 20 0 0 0;"/>
+
+    <ListView fx:id="hardCardsList" prefHeight="350" style="-fx-font-size: 14px;"/>
+
+</VBox>

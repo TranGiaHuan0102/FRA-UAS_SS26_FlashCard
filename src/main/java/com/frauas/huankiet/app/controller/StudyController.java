@@ -1,7 +1,13 @@
+<<<<<<< HEAD:src/main/java/com/frauas/huankiet/app/controller/StudyController.java
 package com.frauas.huankiet.app.controller;
 import com.frauas.huankiet.app.util.UIManager;
 import com.frauas.huankiet.app.cards.Card;
 import com.frauas.huankiet.app.cards.ImageCard;
+=======
+package flashcard.app.controller;
+
+import flashcard.app.util.StatsTracker;
+>>>>>>> 0cfaaad (update ui):src/main/java/flashcard/app/controller/StudyController.java
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -25,13 +31,15 @@ public class StudyController {
     @FXML private HBox feedbackFlow;
     @FXML private TextField answerField;
     @FXML private Button backButton;
-
+    @FXML private javafx.scene.layout.HBox ratingBox;
 
     private List<Card> cards = new ArrayList<>();
     private String correctBackText = "";
 
     private boolean isRevealed = false;
     private final Random random = new Random();
+
+    private Card currentCard;
 
     @FXML
     public void initialize() {
@@ -48,8 +56,84 @@ public class StudyController {
     private void handleEnterPress() {
         if (!isRevealed) {
             revealAnswer();
+        }
+    }
+
+    private void loadRandomCard() {
+
+        if (cards == null || cards.isEmpty()) {
+            frontTextLabel.setGraphic(null);
+            frontTextLabel.setText("No cards found in this deck.");
+            //correctBackText = "";
+            answerField.setEditable(false);
+            answerField.setPromptText("Go back and select another deck...");
+            return;
+        }
+
+        // 1. Decrement the delay offset for all cards in the deck
+        for (Card c : cards) {
+            if (c.getDelayOffset() > 0) {
+                c.setDelayOffset(c.getDelayOffset() - 1);
+            }
+        }
+
+        // 2. Filter which cards are actually allowed to be shown right now
+        java.util.List<Card> availableCards = new java.util.ArrayList<>();
+        java.util.List<Card> hardCards = new java.util.ArrayList<>();
+
+        for (Card c : cards) {
+            if (c.getDelayOffset() <= 0) {
+                availableCards.add(c);
+                if (c.isHard()) hardCards.add(c);
+            }
+        }
+
+        // 3. Selection Algorithm
+        if (!hardCards.isEmpty()) {
+            // Priority 1: Hard cards that are due
+            currentCard = hardCards.get(random.nextInt(hardCards.size()));
+        } else if (!availableCards.isEmpty()) {
+            // Priority 2: Any other card that is due
+            currentCard = availableCards.get(random.nextInt(availableCards.size()));
         } else {
-            loadRandomCard();
+            // Priority 3: If all cards are delayed, force the one with the lowest delay
+            // so the session doesn't hang.
+            currentCard = cards.stream()
+                    .min(java.util.Comparator.comparingInt(Card::getDelayOffset))
+                    .orElse(cards.get(0));
+        }
+
+        // Render logic
+        if (currentCard instanceof flashcard.app.card.ImageCard) {
+            frontTextLabel.setText("");
+            try {
+                String path = currentCard.getFrontSide();
+                if (!path.startsWith("file:") && !path.startsWith("http")) {
+                    path = new java.io.File(path).toURI().toString();
+                }
+                javafx.scene.image.Image img = new javafx.scene.image.Image(path);
+                javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
+                imgView.setFitWidth(350);
+                imgView.setPreserveRatio(true);
+                frontTextLabel.setGraphic(imgView);
+            } catch (Exception e) {
+                frontTextLabel.setGraphic(null);
+                frontTextLabel.setText("[Error loading image]");
+            }
+        } else {
+            frontTextLabel.setGraphic(null);
+            frontTextLabel.setText(currentCard.getFrontSide());
+        }
+
+        correctBackText = currentCard.getBackSide();
+        feedbackFlow.getChildren().clear();
+        answerField.setEditable(true);
+        answerField.clear();
+        answerField.requestFocus();
+        isRevealed = false;
+
+        if (ratingBox != null) {
+            ratingBox.setVisible(false);
         }
     }
 
@@ -67,9 +151,9 @@ public class StudyController {
         resultText.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-font-family: 'Monospaced';");
 
         if (isCompletelyCorrect) {
-            resultText.setFill(Color.web("#27ae60"));
+            resultText.setFill(javafx.scene.paint.Color.web("#27ae60")); // Green
         } else {
-            resultText.setFill(Color.web("#ff0000"));
+            resultText.setFill(javafx.scene.paint.Color.web("#ff0000")); // Red
         }
 
         feedbackFlow.getChildren().add(resultText);
@@ -78,60 +162,43 @@ public class StudyController {
 
         answerField.clear();
         answerField.setEditable(false);
+
+        // --- NEW: Reveal the Easy/Hard buttons at the bottom ---
+        if (ratingBox != null) {
+            ratingBox.setVisible(true);
+        }
     }
 
-    private void loadRandomCard() {
+    @FXML
+    public void handleEasy(javafx.event.ActionEvent event) {
+        handleRating(true);
+    }
 
-        if (cards == null || cards.isEmpty()) {
-            frontTextLabel.setGraphic(null);
-            frontTextLabel.setText("No cards found in this deck.");
-            correctBackText = "";
-            answerField.setEditable(false);
-            answerField.setPromptText("Go back and select another deck...");
-            return;
-        }
+    @FXML
+    public void handleHard(javafx.event.ActionEvent event) {
+        handleRating(false);
+    }
 
-        int randomIndex = random.nextInt(cards.size());
-        Card card = cards.get(randomIndex);
-
-        // --- NEW LOGIC: Check if it's an ImageCard ---
-        if (card instanceof ImageCard) {
-            frontTextLabel.setText(""); // Clear the text
-            try {
-                String path = card.getFrontSide();
-                // JavaFX Image requires a URI (like file://...). Convert absolute path to URI.
-                if (!path.startsWith("file:") && !path.startsWith("http")) {
-                    path = new File(path).toURI().toString();
-                }
-
-                Image img = new Image(path);
-                ImageView imgView = new ImageView(img);
-
-                // Scale the image so it doesn't break your UI
-                imgView.setFitWidth(350);
-                imgView.setPreserveRatio(true);
-
-                frontTextLabel.setGraphic(imgView);
-            } catch (Exception e) {
-                frontTextLabel.setGraphic(null);
-                frontTextLabel.setText("[Error loading image: " + card.getFrontSide() + "]");
-            }
+    private void handleRating(boolean isEasy) {
+        // Track Statistics
+        if (currentCard.isNewCard()) {
+            StatsTracker.newCardsStudiedToday++;
+            currentCard.setNewCard(false);
         } else {
-            frontTextLabel.setGraphic(null);
-            frontTextLabel.setText(card.getFrontSide());
+            StatsTracker.oldCardsRevisedToday++;
         }
 
-        correctBackText = card.getBackSide();
+        // Apply SRS Logic
+        if (isEasy) {
+            currentCard.setHard(false);
+            currentCard.setDelayOffset(25); // Push back 25 cards
+        } else {
+            currentCard.setHard(true);
+            currentCard.setDelayOffset(5); // Show again soon
+        }
 
-        feedbackFlow.getChildren().clear();
-        answerField.setEditable(true);
-        answerField.setPromptText("Type your answer and press Enter...");
-        answerField.clear();
-        answerField.requestFocus();
-
-        isRevealed = false;
+        loadRandomCard(); // load next
     }
-
 
     public void setCardData(String front, String back) {
         this.frontTextLabel.setText(front);

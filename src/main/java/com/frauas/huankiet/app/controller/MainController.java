@@ -43,6 +43,9 @@ public class MainController {
 
     private static MockService mockService; //make it static so that the session registers newly added card
     private ObservableList<String> masterDeckData;
+    public static flashcard.app.service.MockService getMockService() {
+        return mockService;
+    }
 
     @FXML
     public void initialize() {
@@ -139,6 +142,17 @@ public class MainController {
 
     @FXML
     public void showStatsView(ActionEvent actionEvent) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/stat.fxml"));
+            javafx.scene.Parent root = loader.load();
+
+            // Swap out the center content area with the dashboard
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(root);
+        } catch (Exception e) {
+            System.err.println("Failed to load Statistics Dashboard.");
+            e.printStackTrace();
+        }
     }
 
     @FXML
