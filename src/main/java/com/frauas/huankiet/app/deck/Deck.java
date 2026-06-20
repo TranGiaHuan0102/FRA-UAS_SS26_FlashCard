@@ -1,7 +1,9 @@
-package flashcard.app.deck;
+package com.frauas.huankiet.app.deck;
 
-import flashcard.app.util.IDGenerator;
-import flashcard.app.card.*;
+import com.frauas.huankiet.app.cards.Card;
+import com.frauas.huankiet.app.cards.ImageCard;
+import com.frauas.huankiet.app.cards.BasicCard;
+import com.frauas.huankiet.app.util.IDGenerator;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

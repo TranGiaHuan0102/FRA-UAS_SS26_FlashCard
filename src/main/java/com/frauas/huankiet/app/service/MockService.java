@@ -1,6 +1,6 @@
-package flashcard.app.service;
+package com.frauas.huankiet.app.service;
 
-import flashcard.app.deck.Deck;
+import com.frauas.huankiet.app.deck.Deck;
 import java.util.*;
 
 public class MockService {

@@ -1,4 +1,4 @@
-package com.frauas.huankiet.card;
+package com.frauas.huankiet.components.card;
 import com.frauas.huankiet.miscellaneous.IDGenerator;
 
 abstract public class Card {

@@ -1,6 +1,6 @@
-package flashcard.app.card;
+package com.frauas.huankiet.app.cards;
 
-import flashcard.app.util.IDGenerator;
+import com.frauas.huankiet.app.util.IDGenerator;
 public abstract class Card {
     private final String id;
     protected String frontSide, backSide;

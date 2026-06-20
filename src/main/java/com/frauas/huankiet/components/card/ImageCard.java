@@ -1,4 +1,4 @@
-package com.frauas.huankiet.card;
+package com.frauas.huankiet.components.card;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

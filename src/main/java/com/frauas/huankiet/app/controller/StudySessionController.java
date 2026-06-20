@@ -1,4 +1,4 @@
-package flashcard.app.controller;
+package com.frauas.huankiet.app.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -8,8 +8,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.scene.paint.Color;
-import flashcard.app.util.UIManager;
-import flashcard.app.card.Card;
+import com.frauas.huankiet.app.util.UIManager;
+import com.frauas.huankiet.app.cards.Card;
 
 import java.util.ArrayList;
 import java.util.List;

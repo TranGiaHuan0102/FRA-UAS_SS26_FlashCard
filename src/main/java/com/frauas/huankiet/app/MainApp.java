@@ -1,8 +1,8 @@
-package flashcard.app;
+package com.frauas.huankiet.app;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import flashcard.app.util.UIManager;
+import com.frauas.huankiet.app.util.UIManager;
 
 public class MainApp extends Application {
     @Override

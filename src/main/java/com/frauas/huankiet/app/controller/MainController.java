@@ -1,4 +1,4 @@
-package flashcard.app.controller;
+package com.frauas.huankiet.app.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,9 +15,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import flashcard.app.util.UIManager;
-import flashcard.app.service.MockService;
-import flashcard.app.deck.Deck;
+import com.frauas.huankiet.app.util.UIManager;
+import com.frauas.huankiet.app.service.MockService;
+import com.frauas.huankiet.app.deck.Deck;
 
 public class MainController {
 

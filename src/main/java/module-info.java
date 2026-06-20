@@ -2,11 +2,13 @@ module flashcards.app {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.base;
+    requires java.sql;
+    requires io.github.cdimascio.dotenv.java;
 
-    opens flashcard.app.controller to javafx.fxml;
-    opens flashcard.app to javafx.graphics;
+    opens com.frauas.huankiet.app.controller to javafx.fxml;
+    opens com.frauas.huankiet.app to javafx.graphics;
 
-    exports flashcard.app;
-    exports flashcard.app.deck;
-    exports flashcard.app.card;
+    exports com.frauas.huankiet.app;
+    exports com.frauas.huankiet.app.deck;
+    exports com.frauas.huankiet.app.cards;
 }
