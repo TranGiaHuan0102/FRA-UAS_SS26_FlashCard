@@ -1,8 +1,8 @@
-package flashcard.app.controller;
+package com.frauas.huankiet.app.controller;
 
-import flashcard.app.card.Card;
-import flashcard.app.deck.Deck;
-import flashcard.app.util.StatsTracker;
+import com.frauas.huankiet.app.cards.Card;
+import com.frauas.huankiet.app.deck.Deck;
+import com.frauas.huankiet.app.util.StatsTracker;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;

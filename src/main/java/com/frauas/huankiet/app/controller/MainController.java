@@ -43,7 +43,7 @@ public class MainController {
 
     private static MockService mockService; //make it static so that the session registers newly added card
     private ObservableList<String> masterDeckData;
-    public static flashcard.app.service.MockService getMockService() {
+    public static com.frauas.huankiet.app.service.MockService getMockService() {
         return mockService;
     }
 

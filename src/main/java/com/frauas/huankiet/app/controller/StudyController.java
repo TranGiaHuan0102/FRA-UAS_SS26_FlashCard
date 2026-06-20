@@ -1,13 +1,7 @@
-<<<<<<< HEAD:src/main/java/com/frauas/huankiet/app/controller/StudyController.java
 package com.frauas.huankiet.app.controller;
 import com.frauas.huankiet.app.util.UIManager;
 import com.frauas.huankiet.app.cards.Card;
 import com.frauas.huankiet.app.cards.ImageCard;
-=======
-package flashcard.app.controller;
-
-import flashcard.app.util.StatsTracker;
->>>>>>> 0cfaaad (update ui):src/main/java/flashcard/app/controller/StudyController.java
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;

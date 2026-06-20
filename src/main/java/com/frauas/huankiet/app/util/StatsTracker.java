@@ -1,4 +1,4 @@
-package flashcard.app.util;
+package com.frauas.huankiet.app.util;
 
 public class StatsTracker {
     public static int newCardsStudiedToday = 0;
