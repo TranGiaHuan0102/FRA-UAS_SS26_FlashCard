@@ -18,14 +18,11 @@ public class StatisticsController {
 
     @FXML
     public void initialize() {
-        // 1. Load basic stats
-        newCardsLabel.setText(String.valueOf(StatsTracker.newCardsStudiedToday));
+        newCardsLabel.setText(String.valueOf(StatsTracker.newCardsStudiedToday)); // basic stats
         revisedCardsLabel.setText(String.valueOf(StatsTracker.oldCardsRevisedToday));
 
-        // 2. Scan global MockService database for hard cards
-        ObservableList<Card> problemCards = FXCollections.observableArrayList();
+        ObservableList<Card> problemCards = FXCollections.observableArrayList(); // check for hard cards
 
-        // Grab the static database instance from MainController
         if (MainController.getMockService() != null) {
             for (Deck deck : MainController.getMockService().getDecks()) {
                 for (Card card : deck.getCards()) {
@@ -35,10 +32,9 @@ public class StatisticsController {
                 }
             }
         }
-
         hardCardsList.setItems(problemCards);
 
-        // Format how they look in the list
+        // list hard cards in a table
         hardCardsList.setCellFactory(param -> new ListCell<Card>() {
             @Override
             protected void updateItem(Card card, boolean empty) {

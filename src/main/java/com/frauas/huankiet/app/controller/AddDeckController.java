@@ -61,14 +61,17 @@ public class AddDeckController {
             finalDeckName = "Untitled Deck";
         }
         tempDeck.setDeckName(finalDeckName);
-        saved = true; // Flag to let MainController know they actually clicked save
+        saved = true;
 
-        // Close the popup window
-        Stage stage = (Stage) nameField.getScene().getWindow();
+        Stage stage = (Stage) nameField.getScene().getWindow();  // close window after save
         stage.close();
     }
 
     // --- Getters so MainController can retrieve the data ---
-    public Deck getCreatedDeck() { return tempDeck; }
-    public boolean isSaved() { return saved; }
+    public Deck getCreatedDeck() {
+        return tempDeck;
+    }
+    public boolean isSaved() {
+        return saved;
+    }
 }

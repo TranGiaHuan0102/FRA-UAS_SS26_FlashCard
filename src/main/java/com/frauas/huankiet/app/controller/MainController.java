@@ -31,17 +31,13 @@ public class MainController {
     @FXML
     private StackPane contentArea;
     @FXML
-    private Button decksNavButton;
-    @FXML
-    private Button statsNavButton;
-    @FXML
     private TextField searchField;
     @FXML
     private VBox deckViewContainer;
     @FXML
     private ListView<String> deckList;
 
-    private static MockService mockService; //make it static so that the session registers newly added card
+    private static MockService mockService; // make it static so that the session registers newly added card
     private ObservableList<String> masterDeckData;
     public static com.frauas.huankiet.app.service.MockService getMockService() {
         return mockService;
@@ -73,18 +69,16 @@ public class MainController {
 
         deckList.setItems(filteredData);
 
-        // --- ADDED: Custom Cell Factory for Cog Settings Button ---
+        // cell factory to modify setting icon (cog) capability
         deckList.setCellFactory(lv -> new ListCell<String>() {
             private final HBox hbox = new HBox();
             private final Label label = new Label();
-            private final Button cogButton = new Button("⚙"); // Cog icon item
-
+            private final Button cogButton = new Button("⚙");
             {
                 hbox.setAlignment(Pos.CENTER_LEFT);
                 HBox.setHgrow(label, Priority.ALWAYS);
                 label.setMaxWidth(Double.MAX_VALUE);
 
-                // Style the cog button slightly so it feels clickable on the right
                 cogButton.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-font-size: 16px; -fx-padding: 0 5 0 5;");
                 hbox.getChildren().addAll(label, cogButton);
 
@@ -191,15 +185,12 @@ public class MainController {
             popupStage.setTitle("Add New Deck");
             popupStage.setScene(new javafx.scene.Scene(root));
 
-            // Wait until the user closes the popup or clicks save
             popupStage.showAndWait();
 
-            // Retrieve the controller and check if the deck was saved
             AddDeckController controller = loader.getController();
             if (controller.isSaved()) {
                 Deck newDeck = controller.getCreatedDeck();
 
-                // Add it to our mock database and UI list
                 mockService.getDecks().add(newDeck);
                 masterDeckData.add(newDeck.getDeckName());
             }

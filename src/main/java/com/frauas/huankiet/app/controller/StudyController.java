@@ -158,7 +158,6 @@ public class StudyController {
         answerField.clear();
         answerField.setEditable(false);
 
-        // --- NEW: Reveal the Easy/Hard buttons at the bottom ---
         if (ratingBox != null) {
             ratingBox.setVisible(true);
         }
@@ -183,13 +182,12 @@ public class StudyController {
             StatsTracker.oldCardsRevisedToday++;
         }
 
-        // Apply SRS Logic
         if (isEasy) {
             currentCard.setHard(false);
-            currentCard.setDelayOffset(25); // Push back 25 cards
+            currentCard.setDelayOffset(25); // if ez, review card after 25 other cards
         } else {
             currentCard.setHard(true);
-            currentCard.setDelayOffset(5); // Show again soon
+            currentCard.setDelayOffset(5); // if hard, review sooner after 5 cards
         }
 
         loadRandomCard(); // load next
