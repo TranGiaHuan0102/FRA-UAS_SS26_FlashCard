@@ -1,6 +1,6 @@
 package com.frauas.huankiet.app.service;
 
-import com.frauas.huankiet.app.deck.Deck;
+import com.frauas.huankiet.app.classes.decks.Deck;
 import java.util.*;
 
 public class MockService {
