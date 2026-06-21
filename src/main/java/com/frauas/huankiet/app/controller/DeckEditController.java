@@ -9,11 +9,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
-import java.io.File;
-import javafx.scene.layout.HBox;
+import javafx.application.Platform;
 
+import java.io.File;
 import java.util.Optional;
 
 public class DeckEditController {
@@ -34,8 +34,52 @@ public class DeckEditController {
 
         deckNameLabel.setText("Adjusting: " + targetDeck.getDeckName());
         refreshCardLayoutList();
+
+        cardListView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && !cardListView.getSelectionModel().isEmpty()) {
+                Card selectedCard = cardListView.getSelectionModel().getSelectedItem();
+                openEditCardDialog(selectedCard);
+            }
+        });
     }
 
+    private void openEditCardDialog(Card card) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Edit card");
+        dialog.setHeaderText("Modify card details:");
+
+        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+        TextField frontField = new TextField(card.getFrontSide());
+        frontField.setPrefWidth(300);
+
+        TextField backField = new TextField(card.getBackSide());
+        backField.setPrefWidth(300);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 20, 10, 10));
+
+        grid.add(new Label("Front:"), 0, 0);
+        grid.add(frontField, 1, 0);
+        grid.add(new Label("Back:"), 0, 1);
+        grid.add(backField, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        Platform.runLater(frontField::requestFocus); // cursor on front text field
+
+        dialog.showAndWait().ifPresent(result -> {
+            if (result == saveButtonType) {
+                card.setFrontSide(frontField.getText().trim());
+                card.setBackSide(backField.getText().trim());
+
+                cardListView.refresh();
+            }
+        });
+    }
     private void refreshCardLayoutList() {
         cardObservableList = FXCollections.observableArrayList(targetDeck.getCards());
         cardListView.setItems(cardObservableList);
@@ -62,7 +106,6 @@ public class DeckEditController {
             return;
         }
 
-        // Direct removal from the backing array reference list
         targetDeck.getCards().remove(selected);
         refreshCardLayoutList();
     }

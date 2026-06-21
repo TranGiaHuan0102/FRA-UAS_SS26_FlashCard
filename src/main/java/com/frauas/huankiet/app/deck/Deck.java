@@ -23,8 +23,6 @@ public class Deck {
         this.cards = new ArrayList<>();
     }
 
-    // --- NEW METHODS: For adding custom customized cards ---
-
     public void addCard(String front, String back) {
         try {
             this.cards.add(new BasicCard(front, back));
@@ -47,7 +45,7 @@ public class Deck {
         }
     }
 
-    // old addCard method code
+    // old addCard method code (using placeholder), use if needed
     public void addCard(String cardType) {
         if ("IMAGE".equalsIgnoreCase(cardType)) {
             try {

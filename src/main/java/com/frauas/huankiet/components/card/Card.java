@@ -10,7 +10,6 @@ abstract public class Card {
 		this.id = IDGenerator.generate_ID();
 	}
 
-	// Factory for creating cards
 	abstract void createCard() throws Exception;
 
 	abstract String getFrontSide();
