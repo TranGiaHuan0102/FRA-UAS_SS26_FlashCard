@@ -10,5 +10,5 @@ module com.frauas.huankiet.app {
 
     exports com.frauas.huankiet.app;
     exports com.frauas.huankiet.app.deck;
-    exports com.frauas.huankiet.app.cards;
+    exports com.frauas.huankiet.app.classes;
 }

@@ -10,38 +10,27 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.release>21</maven.compiler.release>
-		<exec.mainClass>frauas.huankiet.flashcard.Flashcard</exec.mainClass>
+		<exec.mainClass>com.frauas.huankiet.app.MainApp</exec.mainClass>
 		<junit.version>5.12.1</junit.version>
 	</properties>
 	<build>
 	    <plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.13.0</version>
-				<configuration>
-				<release>21</release>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.openjfx</groupId>
-				<artifactId>javafx-maven-plugin</artifactId>
-				<version>0.0.8</version>
-				<executions>
-					<execution>
-						<id>default-cli</id>
-						<configuration>
-							<mainClass>flashcard.app/flashcard.app.MainApp</mainClass>
-							<launcher>app</launcher>
-							<jlinkZipName>app</jlinkZipName>
-							<jlinkImageName>app</jlinkImageName>
-							<noManPages>true</noManPages>
-							<stripDebug>true</stripDebug>
-							<noHeaderFiles>true</noHeaderFiles>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-compiler-plugin</artifactId>
+		    <version>3.13.0</version>
+		    <configuration>
+			<release>21</release>
+		    </configuration>
+		</plugin>
+		<plugin>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-maven-plugin</artifactId>
+			<version>0.0.8</version>
+			<configuration>
+				<mainClass>com.frauas.huankiet.app.MainApp</mainClass>
+			</configuration>
+		</plugin>
 	    </plugins>
 	</build>
 	<dependencies>

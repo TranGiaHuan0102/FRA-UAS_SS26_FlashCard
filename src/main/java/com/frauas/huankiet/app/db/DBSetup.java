@@ -1,18 +1,17 @@
-package com.frauas.huankiet.database.setup;
-import com.frauas.huankiet.database.connection.ConnectionManager;
+package com.frauas.huankiet.app.db;
 import java.sql.*;
 
 public class DBSetup {
 	public static Connection setup(){
 		try{
 			// Attempt connection to FlashCard DB
-			Connection flashcard = ConnectionManager.AnyConnection("FlashCard");
+			Connection flashcard = DBConnectionController.AnyConnection("FlashCard");
 			if (flashcard == null){
 				System.out.println("First run detected!");
 				System.out.println("Setting up database FlashCard...");
 				
 				// Create FlashCard DB if not exist
-				Connection postgres = ConnectionManager.PostgreSQLConnection();
+				Connection postgres = DBConnectionController.PostgreSQLConnection();
 				if (postgres == null){
 					System.err.println("DBSetup: Unable to access PostgreSQL!");
 					return null;
@@ -22,7 +21,7 @@ public class DBSetup {
 				stmt.execute("CREATE DATABASE \"FlashCard\" WITH OWNER = postgres ENCODING 'UTF8'");
 
 				// Attempt connection to newly created FlashCard
-				flashcard = ConnectionManager.AnyConnection("FlashCard");
+				flashcard = DBConnectionController.AnyConnection("FlashCard");
 				if (flashcard == null){
 					System.err.println("DBSetup: FlashCard created but failed to access!");
 					return null;
@@ -34,7 +33,6 @@ public class DBSetup {
 		}
 		catch (SQLException e){
 			System.err.println("DBSetup: Unable to create database FlashCard\n");
-			e.printStackTrace();
 			return null;
 		}
 	}

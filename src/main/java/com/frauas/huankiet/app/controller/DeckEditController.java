@@ -1,7 +1,7 @@
 package com.frauas.huankiet.app.controller;
 
-import com.frauas.huankiet.app.cards.Card;
-import com.frauas.huankiet.app.deck.Deck;
+import com.frauas.huankiet.app.classes.cards.Card;
+import com.frauas.huankiet.app.classes.decks.Deck;
 import com.frauas.huankiet.app.util.UIManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

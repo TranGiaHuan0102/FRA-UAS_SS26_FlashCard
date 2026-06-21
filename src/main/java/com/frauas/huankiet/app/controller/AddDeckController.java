@@ -1,6 +1,6 @@
 package com.frauas.huankiet.app.controller;
 
-import com.frauas.huankiet.app.deck.Deck;
+import com.frauas.huankiet.app.classes.decks.Deck;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

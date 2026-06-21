@@ -1,4 +1,4 @@
-package com.frauas.huankiet.database.setup;
+package com.frauas.huankiet.app.db;
 import java.io.InputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
