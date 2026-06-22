@@ -1,8 +1,11 @@
 package com.frauas.huankiet.app.controller;
 import com.frauas.huankiet.app.util.StatsTracker;
 import com.frauas.huankiet.app.util.UIManager;
-import com.frauas.huankiet.app.cards.Card;
-import com.frauas.huankiet.app.cards.ImageCard;
+import com.frauas.huankiet.app.classes.cards.*;
+import com.frauas.huankiet.app.classes.decks.*;
+import com.frauas.huankiet.app.db.DBMaster;
+import com.frauas.huankiet.app.db.operations.CardRepository;
+import com.frauas.huankiet.app.db.operations.CardRepositoryException;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -22,39 +25,47 @@ import java.util.Random;
 
 public class StudyController {
 
-    @FXML private Label frontTextLabel;
     @FXML private HBox feedbackFlow;
     @FXML private TextField answerField;
     @FXML private Button backButton;
     @FXML private javafx.scene.layout.HBox ratingBox;
 
+    // Get an instance of CardRepository
+    private final CardRepository cr = DBMaster.getCardRepository();
+	
+    // Study deck and its cards
+    private Deck targetDeck;
     private List<Card> cards = new ArrayList<>();
-    private String correctBackText = "";
+    
+    
+    private Card currentCard;	// Card that is currently used in the test 
+    @FXML private Label frontTextLabel; // The side shown to user 
+    private String correctBackText = "";	// The correct answer, extracted from the hidden side
 
-    private boolean isRevealed = false;
+    private boolean isRevealed = false;		// By default, the answer is hidden, reveal answer with Enter
     private final Random random = new Random();
 
-    private Card currentCard;
-
+    // Load a random card from the current deck to test the user
     @FXML
     public void initialize() {
-
         if (MainController.currentStudyDeck != null) {
-            this.cards = MainController.currentStudyDeck.getCards();
+		this.targetDeck = MainController.currentStudyDeck;
+		try{this.cards = cr.findByDeck(targetDeck);}
+		catch (CardRepositoryException e){System.err.println(e.getMessage());}
         }
-
         answerField.setOnAction(event -> handleEnterPress());
-
         loadRandomCard();
     }
 
-    private void handleEnterPress() {
-        if (!isRevealed) {
-            revealAnswer();
-        }
-    }
-
+    // Implementation of the random function, as well as how cards should be rendered
     private void loadRandomCard() {
+	// Setup parameters	
+        feedbackFlow.getChildren().clear();
+        answerField.setEditable(true);
+        answerField.clear();
+        answerField.requestFocus();
+        isRevealed = false;
+        if (ratingBox != null) {ratingBox.setVisible(false);}
 
         if (cards == null || cards.isEmpty()) {
             frontTextLabel.setGraphic(null);
@@ -69,6 +80,8 @@ public class StudyController {
         for (Card c : cards) {
             if (c.getDelayOffset() > 0) {
                 c.setDelayOffset(c.getDelayOffset() - 1);
+		try{cr.updateCardStats(c);}
+		catch (CardRepositoryException e){System.err.println(e.getMessage());}
             }
         }
 
@@ -99,10 +112,10 @@ public class StudyController {
         }
 
         // Render logic
-        if (currentCard instanceof com.frauas.huankiet.app.cards.ImageCard) {
-            frontTextLabel.setText("");
+	// If currentCard is an ImageCard
+        if (currentCard instanceof ImageCard image) {
             try {
-                String path = currentCard.getFrontSide();
+                String path = image.getImgURL();	// Get image URL
                 if (!path.startsWith("file:") && !path.startsWith("http")) {
                     path = new java.io.File(path).toURI().toString();
                 }
@@ -110,36 +123,39 @@ public class StudyController {
                 javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
                 imgView.setFitWidth(350);
                 imgView.setPreserveRatio(true);
-                frontTextLabel.setGraphic(imgView);
-            } catch (Exception e) {
+                frontTextLabel.setGraphic(imgView);	// Show image as prompt, ask for text answer
+            	frontTextLabel.setText("");
+            }
+	    catch (Exception e) {
                 frontTextLabel.setGraphic(null);
                 frontTextLabel.setText("[Error loading image]");
             }
-        } else {
-            frontTextLabel.setGraphic(null);
-            frontTextLabel.setText(currentCard.getFrontSide());
+	    correctBackText = image.getAnswerText();	// Text answer at the back of ImageCard (messed up earlier, oops)
         }
-
-        correctBackText = currentCard.getBackSide();
-        feedbackFlow.getChildren().clear();
-        answerField.setEditable(true);
-        answerField.clear();
-        answerField.requestFocus();
-        isRevealed = false;
-
-        if (ratingBox != null) {
-            ratingBox.setVisible(false);
+	// If instead a BasicCard
+	else if (currentCard instanceof BasicCard basic) {
+		// Show text as prompt
+		frontTextLabel.setGraphic(null);
+		frontTextLabel.setText(basic.getfrontText());
+		correctBackText = basic.getbackText();
         }
     }
-
+    
+    // If the user press Enter, reveal the answer if not already
+    private void handleEnterPress() {
+        if (!isRevealed) {
+            revealAnswer();
+        }
+    }
+   
     private void revealAnswer() {
         if (cards == null || cards.isEmpty()) {
             return;
         }
-
+	
+	// Get user's answer and compare to card's answer
         String typedAnswer = answerField.getText();
         feedbackFlow.getChildren().clear();
-
         boolean isCompletelyCorrect = typedAnswer.trim().equalsIgnoreCase(correctBackText.trim());
 
         Text resultText = new Text(correctBackText);
@@ -153,6 +169,7 @@ public class StudyController {
 
         feedbackFlow.getChildren().add(resultText);
 
+	// Mark card as revealed
         isRevealed = true;
 
         answerField.clear();
@@ -163,6 +180,7 @@ public class StudyController {
         }
     }
 
+    // Easy and Hard Buttons to modify testing behaviour
     @FXML
     public void handleEasy(javafx.event.ActionEvent event) {
         handleRating(true);
@@ -190,6 +208,10 @@ public class StudyController {
             currentCard.setDelayOffset(5); // if hard, review sooner after 5 cards
         }
 
+	// Update card status in database
+	try{cr.updateCardStats(currentCard);}
+	catch (CardRepositoryException e){System.err.println(e.getMessage());}
+
         loadRandomCard(); // load next
     }
 
@@ -198,6 +220,7 @@ public class StudyController {
         this.correctBackText = back;
     }
 
+    // Return to main.xml via back button
     @FXML
     public void handleBack(ActionEvent event) {
         try {

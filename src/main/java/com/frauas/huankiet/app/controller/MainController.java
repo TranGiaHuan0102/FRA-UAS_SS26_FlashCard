@@ -1,5 +1,10 @@
 package com.frauas.huankiet.app.controller;
 
+import com.frauas.huankiet.app.classes.decks.Deck;
+import com.frauas.huankiet.app.db.DBMaster;
+import com.frauas.huankiet.app.db.operations.DeckRepository;
+import com.frauas.huankiet.app.db.operations.DeckRepositoryException;
+import com.frauas.huankiet.app.util.UIManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -18,15 +23,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 
-
-import com.frauas.huankiet.app.util.UIManager;
-import com.frauas.huankiet.app.service.MockService;
-import com.frauas.huankiet.app.deck.Deck;
-
 public class MainController {
 
     public static Deck currentStudyDeck;
-    public static Deck currentAdjustmentDeck;
+    protected static Deck currentAdjustmentDeck;
 
     @FXML
     private StackPane contentArea;
@@ -34,43 +34,42 @@ public class MainController {
     private TextField searchField;
     @FXML
     private VBox deckViewContainer;
-    @FXML
-    private ListView<String> deckList;
 
-    private static MockService mockService; // make it static so that the session registers newly added card
-    private ObservableList<String> masterDeckData;
-    public static com.frauas.huankiet.app.service.MockService getMockService() {
-        return mockService;
-    }
+    // List of all decks in database
+    private ObservableList<Deck> masterDeckData;
+
+    // A display of the deck list, doesn't actually contain any deck objects
+    @FXML private ListView<Deck> deckList;
+
+    // Get the DeckRepository instance of this session
+    private final DeckRepository dr = DBMaster.getDeckRepository();
 
     @FXML
     public void initialize() {
-        if (mockService == null) {
-            mockService = new MockService();
-        }
-
         masterDeckData = FXCollections.observableArrayList();
 
-        for (Deck deck : mockService.getDecks()) {
-            masterDeckData.add(deck.getDeckName());
-        }
+	// Load all currently existing decks in database
+	try{
+		masterDeckData.addAll(dr.findAll());
+	} catch (DeckRepositoryException e) {System.err.println(e.getMessage());}
 
-        FilteredList<String> filteredData = new FilteredList<>(masterDeckData, p -> true);
+        FilteredList<Deck> filteredData = new FilteredList<>(masterDeckData, p -> true);
 
+	// Search field for displayed decks
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            filteredData.setPredicate(deckName -> {
+            filteredData.setPredicate(deck -> {
                 if (newValue == null || newValue.isEmpty()) {
                     return true;
                 }
                 String lowerCaseFilter = newValue.toLowerCase();
-                return deckName.toLowerCase().contains(lowerCaseFilter);
+                return deck.getDeckName().toLowerCase().contains(lowerCaseFilter);
             });
         });
-
         deckList.setItems(filteredData);
 
-        // cell factory to modify setting icon (cog) capability
-        deckList.setCellFactory(lv -> new ListCell<String>() {
+	// Put a cog icon next to every deck entry in search field
+	// Click on it to target that deck for modifications
+        deckList.setCellFactory(lv -> new ListCell<Deck>() {
             private final HBox hbox = new HBox();
             private final Label label = new Label();
             private final Button cogButton = new Button("⚙");
@@ -83,31 +82,25 @@ public class MainController {
                 hbox.getChildren().addAll(label, cogButton);
 
                 cogButton.setOnAction(event -> {
-                    String deckName = getItem();
-                    if (deckName != null) {
-                        for (Deck deck : mockService.getDecks()) {
-                            if (deck.getDeckName().equalsIgnoreCase(deckName)) {
-                                currentAdjustmentDeck = deck;
-                                break;
-                            }
+			Deck deck = getItem();
+			if (deck != null) {
+				currentAdjustmentDeck = deck;
+				try {UIManager.switchScene("/fxml/deck_edit.fxml");} 
+				catch (Exception e) {
+				    System.err.println("Failed to load Deck Adjustment screen.");
+				    e.printStackTrace();
+				}
                         }
-                        try {
-                            UIManager.switchScene("/fxml/deck_edit.fxml");
-                        } catch (Exception e) {
-                            System.err.println("Failed to load Deck Adjustment screen.");
-                            e.printStackTrace();
-                        }
-                    }
                 });
             }
 
             @Override
-            protected void updateItem(String item, boolean empty) {
+            protected void updateItem(Deck item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setGraphic(null);
                 } else {
-                    label.setText(item);
+                    label.setText(item.getDeckName());
                     setGraphic(hbox);
                 }
             }
@@ -151,19 +144,13 @@ public class MainController {
 
     @FXML
     public void handleStartStudy(ActionEvent actionEvent) {
-        String selectedDeckName = deckList.getSelectionModel().getSelectedItem();
+	Deck selectedDeck = deckList.getSelectionModel().getSelectedItem();
 
-        if (selectedDeckName == null) {
+        if (selectedDeck == null) {
             System.out.println("Please select a deck from the list first!");
             return;
         }
-
-        for (Deck deck : mockService.getDecks()) {
-            if (deck.getDeckName().equalsIgnoreCase(selectedDeckName)) {
-                currentStudyDeck = deck;
-                break;
-            }
-        }
+	currentStudyDeck = selectedDeck;
         try {
             UIManager.switchScene("/fxml/study.fxml");
         } catch (Exception e) {
@@ -187,12 +174,15 @@ public class MainController {
 
             popupStage.showAndWait();
 
+	    // Add the deck to current session and to database
             AddDeckController controller = loader.getController();
             if (controller.isSaved()) {
                 Deck newDeck = controller.getCreatedDeck();
-
-                mockService.getDecks().add(newDeck);
-                masterDeckData.add(newDeck.getDeckName());
+		try{
+			dr.insert(newDeck);
+                	masterDeckData.add(newDeck);
+		}
+		catch (DeckRepositoryException e){System.err.println(e.getMessage());}
             }
 
         } catch (Exception e) {

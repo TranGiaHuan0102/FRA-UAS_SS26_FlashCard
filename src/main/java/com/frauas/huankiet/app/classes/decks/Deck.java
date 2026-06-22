@@ -25,6 +25,8 @@ public class Deck {
 			throw new IllegalStateException("deckID already set, cannot be modified!");}
 		this.deckID = deckID;
 	}
+	
+	public void setDeckName(String deckName){this.deckName = deckName;}
 
 	public void setCreationDate(LocalDateTime creationDate) {
 		if (this.creationDate != null) {

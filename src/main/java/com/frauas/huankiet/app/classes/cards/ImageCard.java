@@ -1,14 +1,15 @@
 package com.frauas.huankiet.app.classes.cards;
 
 public class ImageCard extends Card{
-	private String imgURL;	
+	private final String imgURL;
+	private final String answerText;	
 	
-	protected ImageCard(String frontText, String imgURL){
-		this.frontText = frontText;
+	protected ImageCard(String answerText, String imgURL){
+		this.answerText = answerText;
 		this.imgURL = imgURL;   
 	}	
 	
 	// Getters and Setters
-	public String getbackText(){return this.imgURL;}
-	public void setbackText(String newURL){this.imgURL = newURL;} 
+	public String getAnswerText(){return this.answerText;}
+	public String getImgURL(){return this.imgURL;}
 }

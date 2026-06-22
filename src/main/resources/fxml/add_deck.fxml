@@ -16,17 +16,7 @@
     <Label text="Deck name:"/>
     <TextField fx:id="nameField"/>
 
-    <Label text="Front text:"/>
-    <HBox spacing="5">
-        <TextField fx:id="frontField" prefWidth="200" HBox.hgrow="ALWAYS"/>
-        <Button text="Browse..." onAction="#handleBrowse"/>
-    </HBox>
-
-    <Label text="Back text:"/>
-    <TextField fx:id="backField"/>
-
     <HBox spacing="15" alignment="CENTER_LEFT">
-        <Button text="Add" onAction="#handleAdd"/>
         <Button text="Save" onAction="#handleSave"/>
     </HBox>
 

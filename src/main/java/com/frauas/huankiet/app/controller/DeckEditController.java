@@ -1,7 +1,10 @@
 package com.frauas.huankiet.app.controller;
 
-import com.frauas.huankiet.app.classes.cards.Card;
+import com.frauas.huankiet.app.classes.cards.*;
 import com.frauas.huankiet.app.classes.decks.Deck;
+import com.frauas.huankiet.app.db.DBMaster;
+import com.frauas.huankiet.app.db.operations.CardRepository;
+import com.frauas.huankiet.app.db.operations.CardRepositoryException;
 import com.frauas.huankiet.app.util.UIManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,10 +22,15 @@ import java.util.Optional;
 public class DeckEditController {
 
     @FXML private Label deckNameLabel;
+    private Deck targetDeck;
+
+    // List of all cards belonging to this deck
+    private ObservableList<Card> cardObservableList;
+    // A display of the actual card list, doesn't actually contain any cards
     @FXML private ListView<Card> cardListView;
 
-    private Deck targetDeck;
-    private ObservableList<Card> cardObservableList;
+    // Get the CardRepository instance of this session
+    private final CardRepository cr = DBMaster.getCardRepository();
 
     @FXML
     public void initialize() {
@@ -34,79 +42,52 @@ public class DeckEditController {
 
         deckNameLabel.setText("Adjusting: " + targetDeck.getDeckName());
         refreshCardLayoutList();
-
-        cardListView.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2 && !cardListView.getSelectionModel().isEmpty()) {
-                Card selectedCard = cardListView.getSelectionModel().getSelectedItem();
-                openEditCardDialog(selectedCard);
-            }
-        });
     }
 
-    private void openEditCardDialog(Card card) {
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Edit card");
-        dialog.setHeaderText("Modify card details:");
-
-        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
-
-        TextField frontField = new TextField(card.getFrontSide());
-        frontField.setPrefWidth(300);
-
-        TextField backField = new TextField(card.getBackSide());
-        backField.setPrefWidth(300);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 20, 10, 10));
-
-        grid.add(new Label("Front:"), 0, 0);
-        grid.add(frontField, 1, 0);
-        grid.add(new Label("Back:"), 0, 1);
-        grid.add(backField, 1, 1);
-
-        dialog.getDialogPane().setContent(grid);
-
-        Platform.runLater(frontField::requestFocus); // cursor on front text field
-
-        dialog.showAndWait().ifPresent(result -> {
-            if (result == saveButtonType) {
-                card.setFrontSide(frontField.getText().trim());
-                card.setBackSide(backField.getText().trim());
-
-                cardListView.refresh();
-            }
-        });
-    }
     private void refreshCardLayoutList() {
-        cardObservableList = FXCollections.observableArrayList(targetDeck.getCards());
-        cardListView.setItems(cardObservableList);
+	try{
+		cardObservableList = FXCollections.observableArrayList(cr.findByDeck(targetDeck));
+		cardListView.setItems(cardObservableList);
+	}
+	catch (CardRepositoryException e){
+	    System.err.println(e.getMessage());
+	    cardObservableList = FXCollections.observableArrayList();
+	}
 
-        cardListView.setCellFactory(param -> new ListCell<Card>() {
+	cardListView.setCellFactory(param -> new ListCell<Card>() {
             @Override
             protected void updateItem(Card card, boolean empty) {
                 super.updateItem(card, empty);
-                if (empty || card == null) {
-                    setText(null);
-                } else {
-                    String cardType = card.getClass().getSimpleName();
-                    setText("[" + cardType + "] Front: " + card.getFrontSide() + " | Back: " + card.getBackSide());
-                }
+                if (empty || card == null) {setText(null);} 
+		else {setText(describeCard(card));}
             }
         });
+    }
+
+    private String describeCard(Card c){
+	if (c instanceof BasicCard basic){
+		return "[Basic] Front: " + basic.getfrontText() + " | Back: " + basic.getbackText();
+	}
+	else if (c instanceof ImageCard image){
+		return "[Image] Front: " + image.getImgURL() + " | Image: " + image.getAnswerText(); 
+	}
+	return "[Unknown Card Type]";
     }
 
     @FXML
     public void handleDeleteCard(ActionEvent event) {
+	// Delete without selecting a card triggers an error
         Card selected = cardListView.getSelectionModel().getSelectedItem();
         if (selected == null) {
             showNotification(Alert.AlertType.WARNING, "Selection Required", "Please choose a card from the list to delete.");
             return;
         }
 
-        targetDeck.getCards().remove(selected);
+	// Attempt to delete card from database	
+	try{cr.delete(selected);}
+	catch (CardRepositoryException e){System.err.println(e.getMessage());}
+
+	// Reload UI to reflect change
         refreshCardLayoutList();
     }
 
@@ -136,6 +117,7 @@ public class DeckEditController {
 
         dialog.getDialogPane().setContent(layoutGrid);
 
+	// Get frontText, backText from user input
         Optional<ButtonType> contextAction = dialog.showAndWait();
         if (contextAction.isPresent() && contextAction.get() == confirmButtonType) {
             String frontText = frontInput.getText().trim();
@@ -145,9 +127,11 @@ public class DeckEditController {
                 showNotification(Alert.AlertType.ERROR, "Input Error", "Both text fields are required!");
                 return;
             }
-
-            targetDeck.addCard(frontText, backText);
-            refreshCardLayoutList();
+	    
+	    Card c = CardFactory.createBasic(frontText, backText);	// Create a basic card object
+	    try{cr.insert(c, targetDeck);}	// Add card to database
+	    catch (CardRepositoryException e){System.err.println(e.getMessage());}
+            refreshCardLayoutList();		// Reload for UI to reflect change
         }
     }
 
@@ -207,9 +191,14 @@ public class DeckEditController {
                 showNotification(Alert.AlertType.ERROR, "Input Error", "All configuration fields must be provided.");
                 return;
             }
-
-            targetDeck.addCard(imgPath, backDesc, true);
-            refreshCardLayoutList();
+	   
+	    // Create an image card and add to database
+	    try{
+	        Card c = CardFactory.createImage(backDesc, imgPath);
+		cr.insert(c, targetDeck);
+	    }
+	    catch (CardFactoryException | CardRepositoryException e){System.err.println(e.getMessage());}	    
+            refreshCardLayoutList(); // Reload the UI to reflect change
         }
     }
 
