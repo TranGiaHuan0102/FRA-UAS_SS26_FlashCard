@@ -9,6 +9,6 @@ module com.frauas.huankiet.app {
     opens com.frauas.huankiet.app to javafx.graphics;
 
     exports com.frauas.huankiet.app;
-    exports com.frauas.huankiet.app.deck;
-    exports com.frauas.huankiet.app.classes;
+    exports com.frauas.huankiet.app.classes.decks;
+    exports com.frauas.huankiet.app.classes.cards;
 }

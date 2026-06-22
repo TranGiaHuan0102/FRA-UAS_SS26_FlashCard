@@ -28,8 +28,7 @@ public class DBConnectionController {
 			return DriverManager.getConnection(DB_URL + dbName, USERNAME, PASSWORD);
 		}
 		catch (SQLException e){
-			System.err.println("DBConnectionController: Unable to access database " + dbName);
-			e.printStackTrace();
+			System.err.println("DBConnectionController: Unable to access database" + dbName);
 			return null;
 		}
 	}

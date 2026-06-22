@@ -32,13 +32,20 @@ public class CardRepository {
 				stmt.setString(1, cardType);
 				try (ResultSet rs = stmt.executeQuery()){
 					if (!rs.next()){
-						throw new SQLException("Insert into CARDs succeeded but no returned ID!");
+						throw new SQLException("Insert into CARDS succeeded but no returned ID!");
 					}
 					cardID = rs.getLong("cardID");
 				}
 			}
 
-			// Step 2: Insert into subtype tables
+			// Step 2: Insert into CARD_STATS database
+			String insertStats = "INSERT INTO CARD_STATS (cardID) VALUES(?)";
+			try (PreparedStatement stmt = conn.prepareStatement(insertStats)){
+				stmt.setLong(1, cardID);
+				stmt.executeUpdate();
+			}
+			
+			// Step 3: Insert into subtype tables
 			if (c instanceof BasicCard basic){
 				String insertBasic = "INSERT INTO BASIC_CARDS (cardID, frontSide, backSide) VALUES (?, ?, ?)";
 				try (PreparedStatement stmt = conn.prepareStatement(insertBasic)){
@@ -49,16 +56,16 @@ public class CardRepository {
 				}	
 			}
 			else if (c instanceof ImageCard image){
-				String insertImage = "INSERT INTO IMAGE_CARDS (cardID, frontSide, imagePath) VALUES (?, ?, ?)";
+				String insertImage = "INSERT INTO IMAGE_CARDS (cardID, answerText, imagePath) VALUES (?, ?, ?)";
 				try (PreparedStatement stmt = conn.prepareStatement(insertImage)){
 					stmt.setLong(1, cardID);
-					stmt.setString(2, image.getfrontText());
-					stmt.setString(3, image.getbackText());
+					stmt.setString(2, image.getAnswerText());
+					stmt.setString(3, image.getImgURL());
 					stmt.executeUpdate();
 				}	
 			}
 
-			// Step 3: Link cards to decks
+			// Step 4: Link cards to decks
 			String insertLink = "INSERT INTO DECKS_TO_CARDS (deckID, cardID) VALUES (?, ?)";
 			try (PreparedStatement stmt = conn.prepareStatement(insertLink)){
 				stmt.setLong(1, d.getDeckID());
@@ -72,7 +79,9 @@ public class CardRepository {
 		}
 		catch (SQLException e){
 			// If anything goes wrong, try to rollback and throw exception
-			try{conn.rollback();}
+			try{
+				e.printStackTrace();
+				conn.rollback();}
 			catch(SQLException rollbackEx){e.addSuppressed(rollbackEx);} 
 			throw new CardRepositoryException("Failed to insert card!", null);
 		}
@@ -94,15 +103,37 @@ public class CardRepository {
 		catch (SQLException e){throw new CardRepositoryException("Failed to delete card!", e);}
 	}
 
+	public void updateCardStats(Card c) throws CardRepositoryException{
+		if (c.getCardID() == null){
+			throw new CardRepositoryException("Cannot update status of cards not in database!", null);
+		}
+
+		String updateStatus = "UPDATE CARD_STATS SET isNewCard = ?, isHard = ?, delayOffset = ? "
+			+ "WHERE cardID = ?";
+
+		try (PreparedStatement stmt = conn.prepareStatement(updateStatus)){
+			stmt.setBoolean(1, c.isNewCard());
+			stmt.setBoolean(2, c.isHard());
+			stmt.setInt(3, c.getDelayOffset());
+			stmt.setLong(4, c.getCardID());
+			stmt.executeUpdate();
+		}
+		catch (SQLException e){
+			System.err.println(e.getMessage());
+			throw new CardRepositoryException("Failed to update status of card!", e);}
+	}
+
 	public List<Card> findByDeck(Deck d) throws CardRepositoryException{
 		if (d.getDeckID() == null){
 			throw new CardRepositoryException("Cannot find cards for a deck that has not been inserted!", null);
 		}
 
-		String sql = "SELECT c.cardID, c.cardType, "
-			+ "b.frontSide AS BASIC_FRONT, b.backSide AS BASIC_BACK"
-			+ "i.frontSide AS IMAGE_FRONT, i.imagePath AS IMAGE_PATH"
+		String sql = "SELECT c.cardID, c.cardType,"
+			+ "cs.isNewCard, cs.isHard, cs.delayOffset, "
+			+ "b.frontSide AS BASIC_FRONT, b.backSide AS BASIC_BACK, "
+			+ "i.answerText AS IMAGE_ANSWER, i.imagePath AS IMAGE_PATH "
 			+ "FROM CARDS c "
+			+ "JOIN CARD_STATS cs ON c.cardID = cs.cardID "
 			+ "JOIN DECKS_TO_CARDS dtc ON c.cardID = dtc.cardID "
 			+ "LEFT JOIN BASIC_CARDS b ON c.cardID = b.cardID "
 			+ "LEFT JOIN IMAGE_CARDS i ON c.cardID = i.cardID "
@@ -122,7 +153,7 @@ public class CardRepository {
 						case "IMAGE" -> {
 							try{
 								yield CardFactory.createImage(
-									rs.getString("IMAGE_FRONT"), rs.getString("IMAGE_PATH"));
+									rs.getString("IMAGE_ANSWER"), rs.getString("IMAGE_PATH"));
 							}
 							catch(CardFactoryException e){
 								throw new CardRepositoryException(
@@ -132,7 +163,63 @@ public class CardRepository {
 						default -> throw new CardRepositoryException("Unknown cardType in database!", null);
 					};
 
+					// Update status of card objects
 					card.setCardID(rs.getLong("cardID"));
+					card.setNewCard(rs.getBoolean("isNewCard"));
+					card.setHard(rs.getBoolean("isHard"));
+					card.setDelayOffset(rs.getInt("delayOffset"));
+					
+					// Add card to session deck	
+					cards.add(card);
+				}
+			}
+		}
+		catch (SQLException e){throw new CardRepositoryException("Failed to load cards for deck!", e);}
+		return cards;
+	}
+
+	public List<Card> findbyDifficulity(boolean isHard) throws CardRepositoryException{
+		String sql = "SELECT c.cardID, c.cardType,"
+			+ "cs.isNewCard, cs.delayOffset, "
+			+ "b.frontSide AS BASIC_FRONT, b.backSide AS BASIC_BACK, "
+			+ "i.answerText AS IMAGE_ANSWER, i.imagePath AS IMAGE_PATH "
+			+ "FROM CARDS c "
+			+ "JOIN CARD_STATS cs ON c.cardID = cs.cardID "
+			+ "LEFT JOIN BASIC_CARDS b ON c.cardID = b.cardID "
+			+ "LEFT JOIN IMAGE_CARDS i ON c.cardID = i.cardID "
+			+ "WHERE cs.isHard = ?";
+				
+		List<Card> cards = new ArrayList<>();
+		try (PreparedStatement stmt = conn.prepareStatement(sql)){
+			stmt.setBoolean(1, isHard);
+			try (ResultSet rs = stmt.executeQuery()){
+				while (rs.next()){
+					String cardType = rs.getString("cardType");
+					
+					// Depending on cardType, create corresponding card object
+					Card card = switch(cardType){
+						case "BASIC" -> CardFactory.createBasic(
+							rs.getString("BASIC_FRONT"), rs.getString("BASIC_BACK"));
+						case "IMAGE" -> {
+							try{
+								yield CardFactory.createImage(
+									rs.getString("IMAGE_ANSWER"), rs.getString("IMAGE_PATH"));
+							}
+							catch(CardFactoryException e){
+								throw new CardRepositoryException(
+									"Failed to reconstruct ImageCard from database row", e);
+							}
+						}
+						default -> throw new CardRepositoryException("Unknown cardType in database!", null);
+					};
+
+					// Update status of card objects
+					card.setCardID(rs.getLong("cardID"));
+					card.setNewCard(rs.getBoolean("isNewCard"));
+					card.setHard(isHard);
+					card.setDelayOffset(rs.getInt("delayOffset"));
+					
+					// Add card to session deck	
 					cards.add(card);
 				}
 			}

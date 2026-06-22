@@ -34,7 +34,9 @@ public class DBTableSetup {
 		}
 		catch (IOException e){System.err.println("DBTableSetup: tables.sql loaded but can't be read");}
 		catch (TableCheckException e){System.err.println("DBTableSetup" + e.getMessage());}
-		catch (SQLException e){System.err.println("DBTableSetup: Unable to create tables in database FlashCard");}
+		catch (SQLException e){
+			e.printStackTrace();
+			System.err.println("DBTableSetup: Unable to create tables in database FlashCard");}
 	}
 
 	private static List<String> extractTableNames(String sql){
