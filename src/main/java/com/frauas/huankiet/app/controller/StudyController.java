@@ -106,7 +106,9 @@ public class StudyController {
         } else {
             // Priority 3: If all cards are delayed, force the one with the lowest delay
             // so the session doesn't hang.
+            final Card lastCard = currentCard;
             currentCard = cards.stream()
+                    .filter(c -> cards.size() == 1 || c != lastCard)
                     .min(java.util.Comparator.comparingInt(Card::getDelayOffset))
                     .orElse(cards.get(0));
         }
