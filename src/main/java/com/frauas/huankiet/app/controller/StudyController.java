@@ -40,7 +40,7 @@ public class StudyController {
     
     private Card currentCard;	// Card that is currently used in the test 
     @FXML private Label frontTextLabel; // The side shown to user 
-    private String correctBackText = "";	// The correct answer, extracted from the hidden side
+    private String correctBackText = "";// The correct answer, extracted from the hidden side
 
     private boolean isRevealed = false;		// By default, the answer is hidden, reveal answer with Enter
     private final Random random = new Random();
@@ -104,19 +104,19 @@ public class StudyController {
             // Priority 2: Any other card that is due
             currentCard = availableCards.get(random.nextInt(availableCards.size()));
         } else {
-            // Priority 3: If all cards are delayed, force the one with the lowest delay
-            // so the session doesn't hang.
+            // for decks smaller than 25 cards, we sort remaining cards by delay and pick randomly from the top 3 closest to 0
             final Card lastCard = currentCard;
 
-            java.util.List<Card> validFallbacks = cards.stream()
-                    .filter(c -> cards.size() == 1 || c != lastCard)
+            java.util.List<Card> sortedFallbacks = cards.stream()
+                    .filter(c -> cards.size() == 1 || c != lastCard) // Ignore the one we just answered
+                    .sorted(java.util.Comparator.comparingInt(Card::getDelayOffset)) // Sort by lowest delay first
                     .toList();
 
-            currentCard = validFallbacks.get(random.nextInt(validFallbacks.size()));
+            int poolSize = Math.min(3, sortedFallbacks.size());
+            currentCard = sortedFallbacks.get(random.nextInt(poolSize));
         }
 
-        // Render logic
-	// If currentCard is an ImageCard
+        // card render logic
         if (currentCard instanceof ImageCard image) {
             try {
                 String path = image.getImgURL();	// Get image URL
